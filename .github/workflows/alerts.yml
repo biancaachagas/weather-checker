@@ -1,0 +1,31 @@
+name: Repository Event & Security Alerts
+
+on:
+  delete:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  notify-event:
+    name: Notify Security & Branch Events
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Event Alert to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -n "$DISCORD_WEBHOOK" ]; then
+            if [ "${{ github.event_name }}" == "delete" ]; then
+              MSG="⚠️ **ALERTA DE SEGURANÇA**: A branch ou tag \`${{ github.event.ref }}\` foi **DELETADA** do repositório por **${{ github.actor }}**!"
+            else
+              MSG="🚀 **ALERTA DE COMMIT**: Novo push realizado na branch principal \`main\` por **${{ github.actor }}**!"
+            fi
+
+            curl -H "Content-Type: application/json" \
+                 -X POST \
+                 -d "{\"content\": \"$MSG\"}" \
+                 $DISCORD_WEBHOOK
+          else
+            echo "DISCORD_WEBHOOK secret não configurado."
+          fi
