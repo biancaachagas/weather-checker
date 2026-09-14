@@ -45,3 +45,17 @@ jobs:
             echo "::error title=Workflow Notification Alert::❌ FAILURE: Continuous Integration workflow failed!"
             echo "❌ **ALERT FAILURE**: One or more steps failed during execution." >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Send External Alert to Discord
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -n "$DISCORD_WEBHOOK" ]; then
+            curl -H "Content-Type: application/json" \
+                 -X POST \
+                 -d "{\"content\": \"🔔 **ALERTA DE CI/CD**: O workflow executou com status **${{ job.status }}** no repositório **${{ github.repository }}**! (Branch: \`${{ github.ref_name }}\` | Commit: \`${{ github.sha }}\`)\"}" \
+                 $DISCORD_WEBHOOK
+          else
+            echo "DISCORD_WEBHOOK secret ainda não configurado."
+          fi
