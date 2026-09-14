@@ -33,3 +33,15 @@ jobs:
       - name: Run unit tests with pytest
         run: |
           PYTHONPATH=. pytest
+
+      - name: Send Notification Alert
+        if: always()
+        run: |
+          echo "### 🔔 Status Notification Alert" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "::notice title=Workflow Notification Alert::✅ SUCCESS: All 6 unit tests and code quality checks passed on branch ${{ github.ref_name }}!"
+            echo "✅ **ALERT SUCCESS**: Continuous Integration workflow completed successfully for commit ${{ github.sha }}." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=Workflow Notification Alert::❌ FAILURE: Continuous Integration workflow failed!"
+            echo "❌ **ALERT FAILURE**: One or more steps failed during execution." >> $GITHUB_STEP_SUMMARY
+          fi

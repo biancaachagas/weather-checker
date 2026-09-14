@@ -41,3 +41,15 @@ jobs:
       - name: Simulated Deployment Status
         run: |
           echo "✅ Continuous Deployment: Release package built and verified successfully!"
+
+      - name: Send Notification Alert
+        if: always()
+        run: |
+          echo "### 🔔 CD Notification Alert" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "::notice title=CD Notification Alert::✅ SUCCESS: Package artifact generated and deployed successfully!"
+            echo "✅ **ALERT SUCCESS**: CD release bundle created successfully for commit ${{ github.sha }}." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=CD Notification Alert::❌ FAILURE: CD Deployment workflow failed!"
+            echo "❌ **ALERT FAILURE**: CD process encountered errors." >> $GITHUB_STEP_SUMMARY
+          fi
